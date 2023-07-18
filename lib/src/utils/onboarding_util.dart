@@ -18,9 +18,3 @@ List<List<String>> contentCarousel = [
     'Yuk, gabung sekarang dan pakai aplikasi nya!'
   ]
 ];
-
-List<String> contentImage = [
-  'assets/images/onboarding_first.png',
-  'assets/images/onboarding_second.png',
-  'assets/images/onboarding_last.png',
-];

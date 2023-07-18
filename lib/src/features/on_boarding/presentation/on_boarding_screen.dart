@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:sipunggur_app/src/common_widgets/custom_button.dart';
+import 'package:sipunggur_app/src/features/auth/presentation/login_screen.dart';
 import 'package:sipunggur_app/src/features/on_boarding/presentation/bloc/carousel_onboarding_bloc.dart';
 import 'package:sipunggur_app/src/theme_manager/color_manager.dart';
 import 'package:sipunggur_app/src/theme_manager/font_manager.dart';
@@ -125,8 +127,13 @@ class OnBoardingScreen extends StatelessWidget {
                 child: BlocBuilder<CarouselOnboardingBloc, int>(
                   builder: (context, state) {
                     if (state == 2) {
-                      return ElevatedButton(
-                          onPressed: () {}, child: Text('Get Started'));
+                      return CustomButton(
+                        onTap: () {
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, LoginScreen.loginPath, (route) => false);
+                        },
+                        title: 'Get Started',
+                      );
                     }
                     return Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
