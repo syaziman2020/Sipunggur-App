@@ -18,6 +18,7 @@ class FontSizeManager {
   static double f12 = 12.0.sp;
   static double f13 = 13.0.sp;
   static double f14 = 14.0.sp;
+  static double f15 = 15.0.sp;
   static double f16 = 16.0.sp;
   static double f18 = 18.0.sp;
   static double f20 = 20.0.sp;

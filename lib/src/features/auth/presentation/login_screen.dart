@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:sipunggur_app/src/common_widgets/custom_button.dart';
 import 'package:sipunggur_app/src/common_widgets/custom_textfield.dart';
+import 'package:sipunggur_app/src/features/devices/presentation/main_screen.dart';
 import 'package:sipunggur_app/src/theme_manager/color_manager.dart';
 import 'package:sipunggur_app/src/theme_manager/font_manager.dart';
 import 'package:sipunggur_app/src/theme_manager/style_manager.dart';
@@ -186,7 +187,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(
                     height: 90.h,
                   ),
-                  CustomButton(onTap: () {}, title: 'Sign In Now')
+                  CustomButton(
+                      onTap: () {
+                        Navigator.pushNamed(context, MainScreen.mainPath);
+                      },
+                      title: 'Sign In Now')
                 ],
               ),
             ),
