@@ -70,7 +70,7 @@ class OnBoardingScreen extends StatelessWidget {
               ),
             ),
             Flexible(
-              flex: 1,
+              flex: 2,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -121,7 +121,7 @@ class OnBoardingScreen extends StatelessWidget {
               ),
             ),
             Flexible(
-              flex: 1,
+              flex: 3,
               child: Align(
                 alignment: Alignment.bottomCenter,
                 child: BlocBuilder<CarouselOnboardingBloc, int>(
