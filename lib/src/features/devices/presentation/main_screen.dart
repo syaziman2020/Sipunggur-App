@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -5,16 +7,41 @@ import 'package:flutter_svg/svg.dart';
 import 'package:sipunggur_app/src/common_widgets/card_control.dart';
 import 'package:sipunggur_app/src/common_widgets/card_monitor.dart';
 import 'package:sipunggur_app/src/common_widgets/tile_drawer.dart';
+import 'package:sipunggur_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:sipunggur_app/src/features/devices/presentation/bloc/change_page_bloc.dart';
+import 'package:sipunggur_app/src/features/devices/presentation/bloc/device_bloc.dart';
 import 'package:sipunggur_app/src/features/log/graphic_screen.dart';
 import 'package:sipunggur_app/src/features/log/log_screen.dart';
 import 'package:sipunggur_app/src/theme_manager/color_manager.dart';
 import 'package:sipunggur_app/src/theme_manager/font_manager.dart';
 import 'package:sipunggur_app/src/theme_manager/style_manager.dart';
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
   static const String mainPath = '/main';
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  late Timer _periodicTime;
+
+  @override
+  void initState() {
+    context.read<AuthBloc>().add(ProfileEvent());
+    context.read<DeviceBloc>().add(ControlEvent());
+    init();
+    super.initState();
+  }
+
+  void init() async {
+    Future.delayed(Duration(seconds: 30));
+    _periodicTime = Timer.periodic(Duration(seconds: 30), (timer) {
+      context.read<DeviceBloc>().add(ControlEventPeriodic());
+      print("GetData");
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,63 +54,75 @@ class MainScreen extends StatelessWidget {
         decoration: BoxDecoration(
           color: ColorManager.primaryLight,
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 30.h,
-            ),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(100),
-              child: FadeInImage(
-                width: 52.w,
-                height: 52.w,
-                fit: BoxFit.cover,
-                placeholder: AssetImage('assets/images/profile.png'),
-                image: AssetImage('assets/images/profile.png'),
-              ),
-            ),
-            SizedBox(
-              height: 20.h,
-            ),
-            Text(
-              'Syaziman',
-              style: getTextStyle(
-                FontSizeManager.f16,
-                FontFamilyConstant.fontFamily,
-                FontWeightManager.semiBold,
-                ColorManager.whiteC,
-              ),
-            ),
-            SizedBox(
-              height: 8.h,
-            ),
-            Row(
+        child: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, state) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SvgPicture.asset(
-                  'assets/icons/mail_icon.svg',
-                  width: 14.w,
-                  fit: BoxFit.cover,
-                  color: ColorManager.whiteC,
+                SizedBox(
+                  height: 30.h,
+                ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(100),
+                  child: FadeInImage(
+                    width: 52.w,
+                    height: 52.w,
+                    fit: BoxFit.cover,
+                    placeholder: AssetImage('assets/images/profile.png'),
+                    image: AssetImage('assets/images/profile.png'),
+                  ),
                 ),
                 SizedBox(
-                  width: 5.w,
+                  height: 20.h,
                 ),
                 Text(
-                  'syazimanuray@gmail.com',
+                  (state is ProfileLoading)
+                      ? 'Loading...'
+                      : (state is ProfileSuccess)
+                          ? state.profileModel.data?.name ?? ''
+                          : '',
                   style: getTextStyle(
-                    FontSizeManager.f14,
+                    FontSizeManager.f16,
                     FontFamilyConstant.fontFamily,
-                    FontWeightManager.regular,
+                    FontWeightManager.semiBold,
                     ColorManager.whiteC,
                   ),
                 ),
+                SizedBox(
+                  height: 8.h,
+                ),
+                Row(
+                  children: [
+                    SvgPicture.asset(
+                      'assets/icons/mail_icon.svg',
+                      width: 14.w,
+                      fit: BoxFit.cover,
+                      color: ColorManager.whiteC,
+                    ),
+                    SizedBox(
+                      width: 5.w,
+                    ),
+                    Text(
+                      (state is ProfileLoading)
+                          ? 'Loading...'
+                          : (state is ProfileSuccess)
+                              ? state.profileModel.data?.email ?? ''
+                              : '',
+                      style: getTextStyle(
+                        FontSizeManager.f14,
+                        FontFamilyConstant.fontFamily,
+                        FontWeightManager.regular,
+                        ColorManager.whiteC,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 24.h,
+                ),
               ],
-            ),
-            SizedBox(
-              height: 24.h,
-            ),
-          ],
+            );
+          },
         ),
       );
     }
@@ -156,23 +195,33 @@ class MainScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  '29°C',
-                  style: getTextStyle(
-                    70.w,
-                    FontFamilyConstant.fontFamily,
-                    FontWeightManager.bold,
-                    ColorManager.blackC,
-                  ).copyWith(height: 0),
+                BlocBuilder<DeviceBloc, DeviceState>(
+                  builder: (context, state) {
+                    return Text(
+                      (state is ControlSuccess)
+                          ? '${state.controlModel.data!.humidityTemperature!.temperature ?? 0}°C'
+                          : '...°C',
+                      style: getTextStyle(
+                        70.w,
+                        FontFamilyConstant.fontFamily,
+                        FontWeightManager.bold,
+                        ColorManager.blackC,
+                      ).copyWith(height: 0),
+                    );
+                  },
                 ),
-                Text(
-                  'Kelembapan 30%',
-                  style: getTextStyle(
-                    FontSizeManager.f20,
-                    FontFamilyConstant.fontFamily,
-                    FontWeightManager.semiBold,
-                    ColorManager.blackC,
-                  ).copyWith(height: 0),
+                BlocBuilder<DeviceBloc, DeviceState>(
+                  builder: (context, state) {
+                    return Text(
+                      'Kelembapan ${(state is ControlSuccess) ? '${state.controlModel.data!.humidityTemperature!.humidity ?? 0}' : '...'}%',
+                      style: getTextStyle(
+                        FontSizeManager.f20,
+                        FontFamilyConstant.fontFamily,
+                        FontWeightManager.semiBold,
+                        ColorManager.blackC,
+                      ).copyWith(height: 0),
+                    );
+                  },
                 ),
               ],
             ),
@@ -184,7 +233,7 @@ class MainScreen extends StatelessWidget {
     Widget dahsboard() {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
+        children: [
           CardControl(),
           CardMonitor(),
         ],
@@ -221,6 +270,7 @@ class MainScreen extends StatelessWidget {
             ),
             child: Scaffold(
               appBar: PreferredSize(
+                preferredSize: Size.fromHeight(56.h),
                 child: BlocBuilder<ChangePageBloc, int>(
                   builder: (context, state) {
                     return AppBar(
@@ -228,19 +278,42 @@ class MainScreen extends StatelessWidget {
                       backgroundColor: (state == 0)
                           ? ColorManager.blackC.withOpacity(0.3)
                           : ColorManager.primaryLight,
-                      title: Text(
-                        'Ziman',
-                        style: getTextStyle(
-                          20.w,
-                          FontFamilyConstant.fontFamily,
-                          FontWeightManager.semiBold,
-                          ColorManager.whiteC,
-                        ),
+                      title: BlocBuilder<AuthBloc, AuthState>(
+                        builder: (context, state) {
+                          if (state is ProfileFailed) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                backgroundColor: Colors.red,
+                                content: Text(
+                                  state.message,
+                                  style: getTextStyle(
+                                    FontSizeManager.f14,
+                                    FontFamilyConstant.fontFamily,
+                                    FontWeightManager.medium,
+                                    ColorManager.whiteC,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                          return Text(
+                            (state is ProfileLoading)
+                                ? 'Loading'
+                                : (state is ProfileSuccess)
+                                    ? state.profileModel.data?.name ?? ''
+                                    : '',
+                            style: getTextStyle(
+                              20.w,
+                              FontFamilyConstant.fontFamily,
+                              FontWeightManager.semiBold,
+                              ColorManager.whiteC,
+                            ),
+                          );
+                        },
                       ),
                     );
                   },
                 ),
-                preferredSize: Size.fromHeight(56.h),
               ),
               backgroundColor: Colors.transparent,
               body: BlocBuilder<ChangePageBloc, int>(

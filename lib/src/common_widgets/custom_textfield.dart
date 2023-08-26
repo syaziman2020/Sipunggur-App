@@ -12,19 +12,24 @@ class CustomTextField extends StatelessWidget {
   final bool obscure;
   final TextInputAction action;
   final String iconPath;
+  String? Function(String? value) validator;
+  Function(String value) onSubmit;
 
-  CustomTextField({
-    super.key,
-    required this.controller,
-    required this.hintText,
-    this.obscure = false,
-    this.action = TextInputAction.next,
-    required this.iconPath,
-  });
+  CustomTextField(
+      {super.key,
+      required this.controller,
+      required this.hintText,
+      this.obscure = false,
+      this.action = TextInputAction.next,
+      required this.iconPath,
+      required this.validator,
+      required this.onSubmit});
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      onFieldSubmitted: onSubmit,
+      validator: validator,
       controller: controller,
       textInputAction: action,
       cursorColor: ColorManager.primaryLight,
