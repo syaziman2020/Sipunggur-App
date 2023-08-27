@@ -26,21 +26,3 @@ final class ControlSuccess extends DeviceState {
   @override
   List<Object> get props => [controlModel];
 }
-
-final class MonitoringLoading extends DeviceState {}
-
-final class MonitoringFailed extends DeviceState {
-  final String message;
-  MonitoringFailed(this.message);
-
-  @override
-  List<Object> get props => [message];
-}
-
-final class MonitoringSuccess extends DeviceState {
-  monitoring.MonitoringModel monitoringModel;
-  MonitoringSuccess(this.monitoringModel);
-
-  @override
-  List<Object> get props => [monitoringModel];
-}

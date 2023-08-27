@@ -10,5 +10,3 @@ sealed class DeviceEvent extends Equatable {
 class ControlEvent extends DeviceEvent {}
 
 class ControlEventPeriodic extends DeviceEvent {}
-
-class MonitoringEvent extends DeviceEvent {}

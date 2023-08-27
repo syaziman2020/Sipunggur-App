@@ -44,3 +44,21 @@ final class ProfileSuccess extends AuthState {
 }
 
 final class ProfileLoading extends AuthState {}
+
+final class LogoutLoading extends AuthState {}
+
+final class LogoutFailed extends AuthState {
+  final String message;
+  LogoutFailed(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
+final class LogoutSuccess extends AuthState {
+  final bool result;
+  LogoutSuccess(this.result);
+
+  @override
+  List<Object> get props => [result];
+}

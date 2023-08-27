@@ -50,13 +50,13 @@ class AuthService {
   Future<bool>? logout() async {
     try {
       String? value = await storage.read(key: 'save');
-      final response = await dio.get(
-        "${_mainUrl.mainUrl}/logout",
+      final response = await dio.post(
+        "${_mainUrl.mainUrl}api/logout",
         options: Options(
           headers: {'Authorization': "Bearer ${value}"},
         ),
       );
-
+      print(response.statusCode);
       if (response.statusCode == 200) {
         await storage.delete(key: 'save');
         return true;

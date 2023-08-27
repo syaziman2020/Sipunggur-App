@@ -10,8 +10,11 @@ import 'package:sipunggur_app/src/common_widgets/tile_drawer.dart';
 import 'package:sipunggur_app/src/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:sipunggur_app/src/features/devices/presentation/bloc/change_page_bloc.dart';
 import 'package:sipunggur_app/src/features/devices/presentation/bloc/device_bloc.dart';
-import 'package:sipunggur_app/src/features/log/graphic_screen.dart';
-import 'package:sipunggur_app/src/features/log/log_screen.dart';
+import 'package:sipunggur_app/src/features/devices/presentation/bloc/monitoring_bloc.dart';
+import 'package:sipunggur_app/src/features/log/presentation/graphic_screen.dart';
+import 'package:sipunggur_app/src/features/log/presentation/log_screen.dart';
+import 'package:sipunggur_app/src/features/on_boarding/presentation/bloc/carousel_onboarding_bloc.dart';
+import 'package:sipunggur_app/src/features/on_boarding/presentation/on_boarding_screen.dart';
 import 'package:sipunggur_app/src/theme_manager/color_manager.dart';
 import 'package:sipunggur_app/src/theme_manager/font_manager.dart';
 import 'package:sipunggur_app/src/theme_manager/style_manager.dart';
@@ -31,6 +34,7 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     context.read<AuthBloc>().add(ProfileEvent());
     context.read<DeviceBloc>().add(ControlEvent());
+    context.read<MonitoringBloc>().add(MonitoringEventFirst());
     init();
     super.initState();
   }
@@ -39,8 +43,15 @@ class _MainScreenState extends State<MainScreen> {
     Future.delayed(Duration(seconds: 30));
     _periodicTime = Timer.periodic(Duration(seconds: 30), (timer) {
       context.read<DeviceBloc>().add(ControlEventPeriodic());
+      context.read<MonitoringBloc>().add(MonitoringEventPeriodic());
       print("GetData");
     });
+  }
+
+  @override
+  void dispose() async {
+    init();
+    super.dispose();
   }
 
   @override
@@ -159,7 +170,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
               TileDrawer(
                 onTap: () {
-                  context.read<ChangePageBloc>().add(ChangeIndexEvent(2));
+                  // context.read<ChangePageBloc>().add(ChangeIndexEvent(2));
                 },
                 urlImage: 'assets/icons/graph_icon.svg',
                 title: 'Graphic',
@@ -167,10 +178,49 @@ class _MainScreenState extends State<MainScreen> {
                     ? ColorManager.primary
                     : const Color(0xff8A899C),
               ),
-              TileDrawer(
-                onTap: () {},
-                urlImage: 'assets/icons/logout_icon.svg',
-                title: 'Logout',
+              BlocConsumer<AuthBloc, AuthState>(
+                listener: (context, state) async {
+                  if (state is LogoutFailed) {
+                    print('fail');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        backgroundColor: Colors.red,
+                        content: Text(
+                          state.message,
+                          style: getTextStyle(
+                            FontSizeManager.f14,
+                            FontFamilyConstant.fontFamily,
+                            FontWeightManager.medium,
+                            ColorManager.whiteC,
+                          ),
+                        ),
+                      ),
+                    );
+                  } else if (state is LogoutSuccess) {
+                    Navigator.of(context, rootNavigator: true).pop();
+                    context
+                        .read<CarouselOnboardingBloc>()
+                        .add(ChangeContentEvent(0));
+                    Navigator.pushNamedAndRemoveUntil(context,
+                        OnBoardingScreen.onboardingPath, (route) => false);
+                  }
+                },
+                builder: (context, state) {
+                  if (state is LogoutLoading) {
+                    return TileDrawer(
+                      onTap: () {},
+                      urlImage: 'assets/icons/logout_icon.svg',
+                      title: 'Loading...',
+                    );
+                  }
+                  return TileDrawer(
+                    onTap: () {
+                      context.read<AuthBloc>().add(LogoutEvent());
+                    },
+                    urlImage: 'assets/icons/logout_icon.svg',
+                    title: 'Logout',
+                  );
+                },
               ),
             ],
           );

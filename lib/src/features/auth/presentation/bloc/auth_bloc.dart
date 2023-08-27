@@ -14,6 +14,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc() : super(AuthInitial()) {
     on<LoginEvent>(_onLogin);
     on<ProfileEvent>(_getUser);
+    on<LogoutEvent>(_onLogout);
   }
 
   final AuthService _authService = AuthService();
@@ -38,6 +39,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return emit(
         AuthFailed('Silakan cek kembali koneksi internet anda'),
       );
+    }
+  }
+
+  Future<void> _onLogout(
+    LogoutEvent logoutEvent,
+    Emitter<AuthState> emit,
+  ) async {
+    try {
+      emit(LogoutLoading());
+      bool? result = await _authService.logout();
+      print('ini result $result');
+      if (result != null) {
+        return emit(
+          LogoutSuccess(result),
+        );
+      }
+    } catch (e) {
+      // return emit(
+      //   LogoutFailed(
+      //       'Please check your internet connection again, use a stable connection'),
+      // );
+      rethrow;
     }
   }
 
