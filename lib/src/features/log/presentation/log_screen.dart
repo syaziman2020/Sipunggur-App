@@ -14,36 +14,27 @@ class LogScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 24.w),
-      child: RefreshIndicator(
-        displacement: 100.h,
-        color: ColorManager.primaryLight,
-        backgroundColor: ColorManager.whiteC,
-        onRefresh: () async {
-          context.read<LogBloc>().add(LogEventData());
-        },
-        child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: 30.w,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(
+              height: 30.w,
+            ),
+            Text(
+              'Log Data',
+              style: getTextStyle(
+                FontSizeManager.f18,
+                FontFamilyConstant.fontFamily,
+                FontWeightManager.bold,
+                ColorManager.blackC,
               ),
-              Text(
-                'Log Data',
-                style: getTextStyle(
-                  FontSizeManager.f18,
-                  FontFamilyConstant.fontFamily,
-                  FontWeightManager.bold,
-                  ColorManager.blackC,
-                ),
-              ),
-              CardLog(),
-              SizedBox(
-                height: 20,
-              ),
-            ],
-          ),
+            ),
+            CardLog(),
+            SizedBox(
+              height: 20,
+            ),
+          ],
         ),
       ),
     );

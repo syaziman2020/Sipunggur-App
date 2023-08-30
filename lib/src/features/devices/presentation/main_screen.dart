@@ -11,6 +11,7 @@ import 'package:sipunggur_app/src/features/auth/presentation/bloc/auth_bloc.dart
 import 'package:sipunggur_app/src/features/devices/presentation/bloc/change_page_bloc.dart';
 import 'package:sipunggur_app/src/features/devices/presentation/bloc/device_bloc.dart';
 import 'package:sipunggur_app/src/features/devices/presentation/bloc/monitoring_bloc.dart';
+import 'package:sipunggur_app/src/features/log/presentation/bloc/log_bloc.dart';
 import 'package:sipunggur_app/src/features/log/presentation/graphic_screen.dart';
 import 'package:sipunggur_app/src/features/log/presentation/log_screen.dart';
 import 'package:sipunggur_app/src/features/on_boarding/presentation/bloc/carousel_onboarding_bloc.dart';
@@ -40,12 +41,20 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void init() async {
-    Future.delayed(Duration(seconds: 30));
-    _periodicTime = Timer.periodic(Duration(seconds: 30), (timer) {
-      context.read<DeviceBloc>().add(ControlEventPeriodic());
-      context.read<MonitoringBloc>().add(MonitoringEventPeriodic());
-      print("GetData");
-    });
+    // Delay for 30 seconds
+    await Future.delayed(Duration(seconds: 30));
+
+    // Check if the widget is still mounted before setting up the periodic timer
+    if (mounted) {
+      _periodicTime = Timer.periodic(Duration(seconds: 30), (timer) {
+        // Check if the widget is still mounted before accessing the context
+        if (mounted) {
+          context.read<DeviceBloc>().add(ControlEventPeriodic());
+          context.read<MonitoringBloc>().add(MonitoringEventPeriodic());
+          print("GetData");
+        }
+      });
+    }
   }
 
   @override
@@ -310,7 +319,7 @@ class _MainScreenState extends State<MainScreen> {
             decoration: BoxDecoration(
               color: ColorManager.whiteC,
               image: (state == 0)
-                  ? DecorationImage(
+                  ? const DecorationImage(
                       fit: BoxFit.cover,
                       image: AssetImage(
                         'assets/images/bg_3_resize.jpg',
@@ -324,6 +333,35 @@ class _MainScreenState extends State<MainScreen> {
                 child: BlocBuilder<ChangePageBloc, int>(
                   builder: (context, state) {
                     return AppBar(
+                      actions: [
+                        if (state == 1) ...{
+                          BlocBuilder<LogBloc, LogState>(
+                            builder: (context, state) {
+                              if (state is LogLoading) {
+                                return Padding(
+                                  padding: EdgeInsets.only(right: 14.w),
+                                  child: SizedBox(
+                                    width: 20.w,
+                                    height: 20.h,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 3,
+                                      color: ColorManager.whiteC,
+                                    ),
+                                  ),
+                                );
+                              }
+                              return IconButton(
+                                onPressed: () {
+                                  context.read<LogBloc>().add(LogEventData());
+                                },
+                                icon: const Icon(
+                                  Icons.autorenew,
+                                ),
+                              );
+                            },
+                          )
+                        }
+                      ],
                       iconTheme: IconThemeData(color: ColorManager.whiteC),
                       backgroundColor: (state == 0)
                           ? ColorManager.blackC.withOpacity(0.3)
