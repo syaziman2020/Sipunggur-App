@@ -1,18 +1,22 @@
 import 'dart:async';
 
+import 'package:carousel_slider/carousel_controller.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:sipunggur_app/src/common_widgets/card_control.dart';
-import 'package:sipunggur_app/src/common_widgets/card_monitor.dart';
+
 import 'package:sipunggur_app/src/common_widgets/tile_drawer.dart';
 import 'package:sipunggur_app/src/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:sipunggur_app/src/features/auth/presentation/profile_screen.dart';
+import 'package:sipunggur_app/src/features/devices/domain/monitoring_model.dart';
 import 'package:sipunggur_app/src/features/devices/presentation/bloc/change_page_bloc.dart';
 import 'package:sipunggur_app/src/features/devices/presentation/bloc/device_bloc.dart';
 import 'package:sipunggur_app/src/features/devices/presentation/bloc/monitoring_bloc.dart';
-import 'package:sipunggur_app/src/features/log/presentation/bloc/log_bloc.dart';
-import 'package:sipunggur_app/src/features/log/presentation/graphic_screen.dart';
+import 'package:sipunggur_app/src/features/devices/presentation/scaner_screen.dart';
+
+import 'package:sipunggur_app/src/features/log/presentation/schedule_scree.dart.dart';
 import 'package:sipunggur_app/src/features/log/presentation/log_screen.dart';
 import 'package:sipunggur_app/src/features/on_boarding/presentation/bloc/carousel_onboarding_bloc.dart';
 import 'package:sipunggur_app/src/features/on_boarding/presentation/on_boarding_screen.dart';
@@ -30,6 +34,9 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   late Timer _periodicTime;
+  CarouselController carouselController = CarouselController();
+  TextEditingController changeC = TextEditingController();
+  bool edit = false;
 
   @override
   void initState() {
@@ -88,8 +95,8 @@ class _MainScreenState extends State<MainScreen> {
                     width: 52.w,
                     height: 52.w,
                     fit: BoxFit.cover,
-                    placeholder: AssetImage('assets/images/profile.png'),
-                    image: AssetImage('assets/images/profile.png'),
+                    placeholder: AssetImage('assets/images/no_person.jpg'),
+                    image: AssetImage('assets/images/no_person.jpg'),
                   ),
                 ),
                 SizedBox(
@@ -178,11 +185,9 @@ class _MainScreenState extends State<MainScreen> {
                     : const Color(0xff8A899C),
               ),
               TileDrawer(
-                onTap: () {
-                  // context.read<ChangePageBloc>().add(ChangeIndexEvent(2));
-                },
-                urlImage: 'assets/icons/graph_icon.svg',
-                title: 'Graphic',
+                onTap: () {},
+                urlImage: 'assets/icons/device_icon.svg',
+                title: 'Add Device',
                 color: (state == 2)
                     ? ColorManager.primary
                     : const Color(0xff8A899C),
@@ -237,64 +242,256 @@ class _MainScreenState extends State<MainScreen> {
       );
     }
 
-    SliverAppBar sliverAppBar() {
-      return SliverAppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.transparent,
-        shadowColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        pinned: false,
-        snap: true,
-        floating: true,
-        expandedHeight: 280.h,
-        flexibleSpace: FlexibleSpaceBar(
-          background: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                BlocBuilder<DeviceBloc, DeviceState>(
-                  builder: (context, state) {
-                    return Text(
-                      (state is ControlSuccess)
-                          ? '${state.controlModel.data!.humidityTemperature!.temperature ?? 0}°C'
-                          : '...°C',
-                      style: getTextStyle(
-                        70.w,
-                        FontFamilyConstant.fontFamily,
-                        FontWeightManager.bold,
-                        ColorManager.blackC,
-                      ).copyWith(height: 0),
-                    );
-                  },
-                ),
-                BlocBuilder<DeviceBloc, DeviceState>(
-                  builder: (context, state) {
-                    return Text(
-                      'Kelembapan ${(state is ControlSuccess) ? '${state.controlModel.data!.humidityTemperature!.humidity ?? 0}' : '...'}%',
-                      style: getTextStyle(
-                        FontSizeManager.f20,
-                        FontFamilyConstant.fontFamily,
-                        FontWeightManager.semiBold,
-                        ColorManager.blackC,
-                      ).copyWith(height: 0),
-                    );
-                  },
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
     Widget dahsboard() {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CardControl(),
-          CardMonitor(),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(top: 20.h),
+                  decoration: BoxDecoration(
+                    color: ColorManager.whiteC,
+                    borderRadius: BorderRadius.circular(20.w),
+                    boxShadow: [
+                      BoxShadow(
+                        color: ColorManager.primary.withOpacity(0.2),
+                        offset: Offset(0, 5),
+                        blurRadius: 20,
+                      )
+                    ],
+                  ),
+                  width: double.infinity,
+                  height: 150.h,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Flexible(
+                        flex: 3,
+                        child: Padding(
+                          padding: EdgeInsets.only(left: 14.w, top: 20.w),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              BlocBuilder<DeviceBloc, DeviceState>(
+                                builder: (context, state) {
+                                  if (state is ControlSuccess) {
+                                    return Text.rich(
+                                      TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: 'Temperatur ',
+                                            style: getTextStyle(
+                                              FontSizeManager.f18,
+                                              FontFamilyConstant.fontFamily,
+                                              FontWeightManager.regular,
+                                              ColorManager.blackC,
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text:
+                                                '${state.controlModel.data?.humidityTemperature?.temperature ?? 0}°C',
+                                            style: getTextStyle(
+                                              FontSizeManager.f18,
+                                              FontFamilyConstant.fontFamily,
+                                              FontWeightManager.bold,
+                                              ColorManager.blackC,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }
+                                  return Text.rich(
+                                    TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: 'Temperatur ',
+                                          style: getTextStyle(
+                                            FontSizeManager.f18,
+                                            FontFamilyConstant.fontFamily,
+                                            FontWeightManager.regular,
+                                            ColorManager.blackC,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: '...°C',
+                                          style: getTextStyle(
+                                            FontSizeManager.f18,
+                                            FontFamilyConstant.fontFamily,
+                                            FontWeightManager.bold,
+                                            ColorManager.blackC,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                              SizedBox(
+                                height: 24.h,
+                              ),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SvgPicture.asset(
+                                    'assets/icons/humidity_icon.svg',
+                                  ),
+                                  const SizedBox(width: 3),
+                                  BlocBuilder<DeviceBloc, DeviceState>(
+                                    builder: (context, state) {
+                                      if (state is ControlSuccess) {
+                                        return Text(
+                                          'Kelemban Udara ${state.controlModel.data?.humidityTemperature?.humidity ?? 0} RH',
+                                          style: getTextStyle(
+                                            FontSizeManager.f16,
+                                            FontFamilyConstant.fontFamily,
+                                            FontWeightManager.regular,
+                                            ColorManager.blackC,
+                                          ),
+                                        );
+                                      }
+                                      return Text(
+                                        'Kelemban Udara ...y RH',
+                                        style: getTextStyle(
+                                          FontSizeManager.f16,
+                                          FontFamilyConstant.fontFamily,
+                                          FontWeightManager.regular,
+                                          ColorManager.blackC,
+                                        ),
+                                      );
+                                    },
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Flexible(
+                        flex: 1,
+                        child: Image.asset(
+                          'assets/images/logo_sipunggur.png',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 30.h,
+                ),
+                Text(
+                  'Kelembapan Tanah',
+                  style: getTextStyle(
+                    FontSizeManager.f16,
+                    FontFamilyConstant.fontFamily,
+                    FontWeightManager.semiBold,
+                    ColorManager.blackC,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 14.h,
+          ),
+          BlocConsumer<MonitoringBloc, MonitoringState>(
+            listener: (context, state) {
+              if (state is MonitoringFailed) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    backgroundColor: Colors.red,
+                    content: Text(
+                      state.message,
+                      style: getTextStyle(
+                        FontSizeManager.f14,
+                        FontFamilyConstant.fontFamily,
+                        FontWeightManager.medium,
+                        ColorManager.whiteC,
+                      ),
+                    ),
+                  ),
+                );
+              }
+            },
+            builder: (context, state) {
+              if (state is MonitoringSuccess) {
+                return CarouselSlider(
+                  items: [
+                    if (state.monitoringModel.data != null) ...{
+                      if (state.monitoringModel.data!.isNotEmpty) ...{
+                        ...state.monitoringModel.data!.map(
+                          (e) {
+                            return GridView.count(
+                              padding: EdgeInsets.symmetric(horizontal: 20.w),
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              crossAxisSpacing: 50.w,
+                              mainAxisSpacing: 30.h,
+                              crossAxisCount: 2,
+                              children: [
+                                if (e.sensor != null ||
+                                    e.sensor!.isNotEmpty) ...{
+                                  ...e.sensor!.map((f) {
+                                    return GestureDetector(
+                                      onTap: () {
+                                        dialogPot(context, f);
+                                      },
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Image.asset(
+                                            'assets/images/pot_new.png',
+                                            width: 110.w,
+                                            fit: BoxFit.cover,
+                                          ),
+                                          SizedBox(
+                                            height: 10.h,
+                                          ),
+                                          Text(
+                                            '${f.sensorName}',
+                                            style: getTextStyle(
+                                              FontSizeManager.f16,
+                                              FontFamilyConstant.fontFamily,
+                                              FontWeightManager.regular,
+                                              ColorManager.blackC,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    );
+                                  })
+                                },
+                              ],
+                            );
+                          },
+                        ),
+                      } else ...{
+                        SizedBox(),
+                      }
+                    } else ...{
+                      SizedBox(),
+                    }
+                  ],
+                  options: CarouselOptions(
+                    enableInfiniteScroll: false,
+                    enlargeCenterPage: true,
+                    viewportFraction: 1,
+                    aspectRatio: 1,
+                  ),
+                );
+              } else if (state is MonitoringLoading) {
+                return SizedBox();
+              }
+              return SizedBox();
+            },
+          ),
         ],
       );
     }
@@ -306,137 +503,313 @@ class _MainScreenState extends State<MainScreen> {
         case 1:
           return LogScreen();
         case 2:
-          return GraphicScreen();
+          return ScheduleScreen();
+        case 3:
+          return ProfileScreen();
         default:
           return dahsboard();
       }
     }
 
-    return SafeArea(
-      child: BlocBuilder<ChangePageBloc, int>(
-        builder: (context, state) {
-          return Container(
-            decoration: BoxDecoration(
-              color: ColorManager.whiteC,
-              image: (state == 0)
-                  ? const DecorationImage(
-                      fit: BoxFit.cover,
-                      image: AssetImage(
-                        'assets/images/bg_3_resize.jpg',
-                      ),
-                    )
-                  : null,
+    Widget floatingAction() {
+      return FloatingActionButton(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50),
+        ),
+        elevation: 0,
+        backgroundColor: ColorManager.primaryLight,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ScanerScreen(),
             ),
-            child: Scaffold(
-              appBar: PreferredSize(
-                preferredSize: Size.fromHeight(56.h),
-                child: BlocBuilder<ChangePageBloc, int>(
+          );
+        },
+        child: Icon(
+          Icons.qr_code_scanner,
+          color: ColorManager.whiteC,
+        ),
+      );
+    }
+
+    Widget bottomNavbar() {
+      return Container(
+        height: 58,
+        decoration: BoxDecoration(
+          color: ColorManager.whiteC,
+          boxShadow: [
+            BoxShadow(
+              color: ColorManager.primaryLight.withOpacity(0.5),
+              offset: Offset(0, 0),
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20.w),
+          child: BlocBuilder<ChangePageBloc, int>(
+            builder: (context, state) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      context.read<ChangePageBloc>().add(ChangeIndexEvent(0));
+                    },
+                    icon: Icon(
+                      Icons.home,
+                      size: 24.w,
+                      color: (state == 0)
+                          ? ColorManager.primaryLight
+                          : ColorManager.greyNavbar,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      context.read<ChangePageBloc>().add(ChangeIndexEvent(1));
+                    },
+                    icon: Icon(
+                      Icons.format_list_bulleted,
+                      size: 24.w,
+                      color: (state == 1)
+                          ? ColorManager.primaryLight
+                          : ColorManager.greyNavbar,
+                    ),
+                  ),
+                  const SizedBox(),
+                  IconButton(
+                    onPressed: () {
+                      context.read<ChangePageBloc>().add(ChangeIndexEvent(2));
+                    },
+                    icon: Icon(
+                      Icons.schedule,
+                      size: 24.w,
+                      color: (state == 2)
+                          ? ColorManager.primaryLight
+                          : ColorManager.greyNavbar,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      context.read<ChangePageBloc>().add(ChangeIndexEvent(3));
+                    },
+                    icon: Icon(
+                      Icons.person,
+                      size: 24.w,
+                      color: (state == 3)
+                          ? ColorManager.primaryLight
+                          : ColorManager.greyNavbar,
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    PreferredSizeWidget appbar() {
+      return PreferredSize(
+        preferredSize: Size.fromHeight(80.h),
+        child: Padding(
+          padding: EdgeInsets.only(
+            left: 20.w,
+            top: 10.h,
+          ),
+          child: AppBar(
+            surfaceTintColor: ColorManager.whiteC,
+            leading: ClipRRect(
+              borderRadius: BorderRadius.circular(50.w),
+              child: Image.asset(
+                'assets/images/blank_person.png',
+                fit: BoxFit.cover,
+                width: 40,
+                height: 40,
+              ),
+            ),
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                BlocBuilder<AuthBloc, AuthState>(
                   builder: (context, state) {
-                    return AppBar(
-                      actions: [
-                        if (state == 1) ...{
-                          BlocBuilder<LogBloc, LogState>(
-                            builder: (context, state) {
-                              if (state is LogLoading) {
-                                return Padding(
-                                  padding: EdgeInsets.only(right: 14.w),
-                                  child: SizedBox(
-                                    width: 20.w,
-                                    height: 20.h,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 3,
-                                      color: ColorManager.whiteC,
-                                    ),
-                                  ),
-                                );
-                              }
-                              return IconButton(
-                                onPressed: () {
-                                  context.read<LogBloc>().add(LogEventData());
-                                },
-                                icon: const Icon(
-                                  Icons.autorenew,
-                                ),
-                              );
-                            },
-                          )
-                        }
-                      ],
-                      iconTheme: IconThemeData(color: ColorManager.whiteC),
-                      backgroundColor: (state == 0)
-                          ? ColorManager.blackC.withOpacity(0.3)
-                          : ColorManager.primaryLight,
-                      title: BlocBuilder<AuthBloc, AuthState>(
-                        builder: (context, state) {
-                          if (state is ProfileFailed) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                backgroundColor: Colors.red,
-                                content: Text(
-                                  state.message,
-                                  style: getTextStyle(
-                                    FontSizeManager.f14,
-                                    FontFamilyConstant.fontFamily,
-                                    FontWeightManager.medium,
-                                    ColorManager.whiteC,
-                                  ),
-                                ),
-                              ),
-                            );
-                          }
-                          return Text(
-                            (state is ProfileLoading)
-                                ? 'Loading'
-                                : (state is ProfileSuccess)
-                                    ? state.profileModel.data?.name ?? ''
-                                    : '',
-                            style: getTextStyle(
-                              20.w,
-                              FontFamilyConstant.fontFamily,
-                              FontWeightManager.semiBold,
-                              ColorManager.whiteC,
-                            ),
-                          );
-                        },
+                    return Text(
+                      'Halo ${(state is ProfileSuccess) ? state.profileModel.data?.name ?? '...' : '...'}',
+                      style: getTextStyle(
+                        FontSizeManager.f18,
+                        FontFamilyConstant.fontFamily,
+                        FontWeightManager.bold,
+                        ColorManager.blackC,
                       ),
                     );
                   },
                 ),
-              ),
-              backgroundColor: Colors.transparent,
-              body: BlocBuilder<ChangePageBloc, int>(
-                builder: (context, state) {
-                  return CustomScrollView(
-                    slivers: [
-                      if (state == 0) ...{
-                        sliverAppBar(),
-                      },
-                      SliverList.list(children: [
-                        content(state),
-                      ]),
-                    ],
-                  );
-                },
-              ),
-              drawer: Drawer(
-                backgroundColor: ColorManager.whiteC,
-                surfaceTintColor: ColorManager.whiteC,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(0),
-                      bottomRight: Radius.circular(0)),
+                SizedBox(
+                  height: 4.h,
                 ),
-                child: Column(
-                  children: [
-                    headerDrawer(),
-                    listFeature(),
-                  ],
+                Text(
+                  'Selamat Pagi',
+                  style: getTextStyle(
+                    FontSizeManager.f14,
+                    FontFamilyConstant.fontFamily,
+                    FontWeightManager.medium,
+                    ColorManager.greyC,
+                  ),
                 ),
-              ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return SafeArea(
+      child: BlocBuilder<ChangePageBloc, int>(
+        builder: (context, state) {
+          return Scaffold(
+            appBar: (state == 0 || state == 1 || state == 2) ? appbar() : null,
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerDocked,
+            backgroundColor: ColorManager.whiteC,
+            floatingActionButton: floatingAction(),
+            bottomNavigationBar: bottomNavbar(),
+            body: BlocBuilder<ChangePageBloc, int>(
+              builder: (context, state) {
+                return SingleChildScrollView(
+                  child: content(state),
+                );
+              },
             ),
           );
         },
       ),
+    );
+  }
+
+  Future<dynamic> dialogPot(BuildContext context, Sensor f) {
+    changeC.text = f.sensorName ?? '...';
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          titlePadding: EdgeInsets.only(bottom: 10.h, top: 20.h),
+          backgroundColor: ColorManager.whiteC,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 200.w,
+                  height: 45.h,
+                  child: TextFormField(
+                    textAlign: TextAlign.center,
+                    style: getTextStyle(
+                      FontSizeManager.f22,
+                      FontFamilyConstant.fontFamily,
+                      FontWeightManager.semiBold,
+                      ColorManager.blackC,
+                    ),
+                    enabled: edit,
+                    controller: changeC,
+                    textInputAction: TextInputAction.done,
+                    cursorColor: ColorManager.primaryLight,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.all(10),
+                      hintStyle: getTextStyle(
+                        FontSizeManager.f15,
+                        FontFamilyConstant.fontFamily,
+                        FontWeightManager.regular,
+                        ColorManager.greyDarkC,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                          30,
+                        ),
+                        borderSide:
+                            BorderSide(color: ColorManager.primaryLight),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(
+                          30,
+                        ),
+                        borderSide: BorderSide(
+                          color: ColorManager.primaryLight,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        edit = !edit;
+                      });
+                    },
+                    icon: const Icon(
+                      Icons.edit,
+                      size: 22,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                'assets/icons/soil_icon.svg',
+                width: 32.w,
+                fit: BoxFit.cover,
+              ),
+              SizedBox(
+                width: 5.w,
+              ),
+              Text(
+                '${f.soilMoisture ?? 0}%',
+                style: getTextStyle(
+                  FontSizeManager.f30,
+                  FontFamilyConstant.fontFamily,
+                  FontWeightManager.bold,
+                  ColorManager.blackC,
+                ),
+              )
+            ],
+          ),
+          actions: [
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 10.w),
+                  elevation: 10.w,
+                  backgroundColor: ColorManager.primaryLight,
+                  shadowColor: ColorManager.primaryLight,
+                ),
+                child: Text(
+                  'Oke',
+                  style: getTextStyle(
+                    FontSizeManager.f14,
+                    FontFamilyConstant.fontFamily,
+                    FontWeightManager.semiBold,
+                    ColorManager.whiteC,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

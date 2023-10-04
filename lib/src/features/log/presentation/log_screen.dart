@@ -7,8 +7,20 @@ import 'package:sipunggur_app/src/theme_manager/color_manager.dart';
 import 'package:sipunggur_app/src/theme_manager/font_manager.dart';
 import 'package:sipunggur_app/src/theme_manager/style_manager.dart';
 
-class LogScreen extends StatelessWidget {
+class LogScreen extends StatefulWidget {
   const LogScreen({super.key});
+
+  @override
+  State<LogScreen> createState() => _LogScreenState();
+}
+
+class _LogScreenState extends State<LogScreen> {
+  @override
+  void initState() {
+    context.read<LogBloc>().add(LogEventData());
+    print('hehe');
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,17 +31,41 @@ class LogScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 30.w,
+              height: 10.w,
             ),
-            Text(
-              'Log Data',
-              style: getTextStyle(
-                FontSizeManager.f18,
-                FontFamilyConstant.fontFamily,
-                FontWeightManager.bold,
-                ColorManager.blackC,
-              ),
-            ),
+            BlocBuilder<LogBloc, LogState>(builder: (context, state) {
+              if (state is LogSuccess) {
+                if (state.logModel.data!.isNotEmpty) {
+                  return Text(
+                    'Log Data (${state.logModel.data!.length})',
+                    style: getTextStyle(
+                      FontSizeManager.f18,
+                      FontFamilyConstant.fontFamily,
+                      FontWeightManager.bold,
+                      ColorManager.blackC,
+                    ),
+                  );
+                }
+                return Text(
+                  'Log Data (0)',
+                  style: getTextStyle(
+                    FontSizeManager.f18,
+                    FontFamilyConstant.fontFamily,
+                    FontWeightManager.bold,
+                    ColorManager.blackC,
+                  ),
+                );
+              }
+              return Text(
+                'Log Data (...)',
+                style: getTextStyle(
+                  FontSizeManager.f18,
+                  FontFamilyConstant.fontFamily,
+                  FontWeightManager.bold,
+                  ColorManager.blackC,
+                ),
+              );
+            }),
             CardLog(),
             SizedBox(
               height: 20,

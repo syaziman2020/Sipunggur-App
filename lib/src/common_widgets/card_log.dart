@@ -18,200 +18,218 @@ class CardLog extends StatefulWidget {
 
 class _CardLogState extends State<CardLog> {
   @override
-  void initState() {
-    context.read<LogBloc>().add(LogEventData());
-    print('hehe');
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    Widget cardLog(
-        String humidiy, String soil, String temp, String date, String time) {
+    Widget cardLog(String humidiy, String soil, String temp, String date,
+        String time, String number) {
       return Container(
         margin: EdgeInsets.only(top: 20.w),
-        padding: EdgeInsets.symmetric(
-          horizontal: 10.w,
-          vertical: 15.w,
-        ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: ColorManager.secondary),
         ),
         child: Column(
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    SvgPicture.asset(
-                      'assets/icons/humidity_icon.svg',
-                      fit: BoxFit.cover,
-                      width: 22.w,
-                      height: 22.w,
-                    ),
-                    SizedBox(
-                      width: 5.w,
-                    ),
-                    Text(
-                      'Humidity',
-                      style: getTextStyle(
-                        FontSizeManager.f14,
-                        FontFamilyConstant.fontFamily,
-                        FontWeightManager.regular,
-                        ColorManager.greyC,
-                      ),
-                    ),
-                  ],
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              decoration: BoxDecoration(
+                color: ColorManager.primaryLight,
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
                 ),
-                Text(
-                  '$humidiy%',
+              ),
+              child: Center(
+                child: Text(
+                  number,
                   style: getTextStyle(
-                    FontSizeManager.f14,
+                    FontSizeManager.f16,
                     FontFamilyConstant.fontFamily,
                     FontWeightManager.bold,
-                    ColorManager.blackC,
+                    ColorManager.whiteC,
                   ),
                 ),
-              ],
+              ),
             ),
-            SizedBox(
-              height: 12.h,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    SvgPicture.asset(
-                      'assets/icons/soil_icon.svg',
-                      fit: BoxFit.cover,
-                      width: 22.w,
-                      height: 22.w,
-                    ),
-                    SizedBox(
-                      width: 5.w,
-                    ),
-                    Text(
-                      'Soil Moisture',
-                      style: getTextStyle(
-                        FontSizeManager.f14,
-                        FontFamilyConstant.fontFamily,
-                        FontWeightManager.regular,
-                        ColorManager.greyC,
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 10.w),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          SvgPicture.asset(
+                            'assets/icons/humidity_icon.svg',
+                            fit: BoxFit.cover,
+                            width: 22.w,
+                            height: 22.w,
+                          ),
+                          SizedBox(
+                            width: 5.w,
+                          ),
+                          Text(
+                            'Kelembapan Udara',
+                            style: getTextStyle(
+                              FontSizeManager.f14,
+                              FontFamilyConstant.fontFamily,
+                              FontWeightManager.regular,
+                              ColorManager.greyC,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-                Text(
-                  '$soil%',
-                  style: getTextStyle(
-                    FontSizeManager.f14,
-                    FontFamilyConstant.fontFamily,
-                    FontWeightManager.bold,
-                    ColorManager.blackC,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 12.h,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    SvgPicture.asset(
-                      'assets/icons/humidity_icon.svg',
-                      fit: BoxFit.cover,
-                      width: 22.w,
-                      height: 22.w,
-                    ),
-                    SizedBox(
-                      width: 5.w,
-                    ),
-                    Text(
-                      'Temperature',
-                      style: getTextStyle(
-                        FontSizeManager.f14,
-                        FontFamilyConstant.fontFamily,
-                        FontWeightManager.regular,
-                        ColorManager.greyC,
+                      Text(
+                        '$humidiy RH',
+                        style: getTextStyle(
+                          FontSizeManager.f14,
+                          FontFamilyConstant.fontFamily,
+                          FontWeightManager.bold,
+                          ColorManager.blackC,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Text(
-                  '$temp°C',
-                  style: getTextStyle(
-                    FontSizeManager.f14,
-                    FontFamilyConstant.fontFamily,
-                    FontWeightManager.bold,
-                    ColorManager.blackC,
+                    ],
                   ),
-                ),
-              ],
-            ),
-            SizedBox(
-              height: 12.h,
-            ),
-            Divider(
-              color: ColorManager.secondary,
-            ),
-            SizedBox(
-              height: 10.h,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Tanggal',
-                  style: getTextStyle(
-                    FontSizeManager.f12,
-                    FontFamilyConstant.fontFamily,
-                    FontWeightManager.regular,
-                    ColorManager.greyC,
+                  SizedBox(
+                    height: 12.h,
                   ),
-                ),
-                Text(
-                  'Waktu',
-                  style: getTextStyle(
-                    FontSizeManager.f12,
-                    FontFamilyConstant.fontFamily,
-                    FontWeightManager.regular,
-                    ColorManager.greyC,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          SvgPicture.asset(
+                            'assets/icons/soil_icon.svg',
+                            fit: BoxFit.cover,
+                            width: 22.w,
+                            height: 22.w,
+                          ),
+                          SizedBox(
+                            width: 5.w,
+                          ),
+                          Text(
+                            'Kelembapan Tanah',
+                            style: getTextStyle(
+                              FontSizeManager.f14,
+                              FontFamilyConstant.fontFamily,
+                              FontWeightManager.regular,
+                              ColorManager.greyC,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '$soil%',
+                        style: getTextStyle(
+                          FontSizeManager.f14,
+                          FontFamilyConstant.fontFamily,
+                          FontWeightManager.bold,
+                          ColorManager.blackC,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
+                  SizedBox(
+                    height: 12.h,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          SvgPicture.asset(
+                            'assets/icons/humidity_icon.svg',
+                            fit: BoxFit.cover,
+                            width: 22.w,
+                            height: 22.w,
+                          ),
+                          SizedBox(
+                            width: 5.w,
+                          ),
+                          Text(
+                            'Temperatur',
+                            style: getTextStyle(
+                              FontSizeManager.f14,
+                              FontFamilyConstant.fontFamily,
+                              FontWeightManager.regular,
+                              ColorManager.greyC,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        '$temp°C',
+                        style: getTextStyle(
+                          FontSizeManager.f14,
+                          FontFamilyConstant.fontFamily,
+                          FontWeightManager.bold,
+                          ColorManager.blackC,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 12.h,
+                  ),
+                  Divider(
+                    color: ColorManager.secondary,
+                  ),
+                  SizedBox(
+                    height: 10.h,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Tanggal',
+                        style: getTextStyle(
+                          FontSizeManager.f12,
+                          FontFamilyConstant.fontFamily,
+                          FontWeightManager.regular,
+                          ColorManager.greyC,
+                        ),
+                      ),
+                      Text(
+                        'Waktu',
+                        style: getTextStyle(
+                          FontSizeManager.f12,
+                          FontFamilyConstant.fontFamily,
+                          FontWeightManager.regular,
+                          ColorManager.greyC,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 5.w,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        date,
+                        style: getTextStyle(
+                          FontSizeManager.f12,
+                          FontFamilyConstant.fontFamily,
+                          FontWeightManager.regular,
+                          ColorManager.blackC,
+                        ),
+                      ),
+                      Text(
+                        '$time WIB',
+                        style: getTextStyle(
+                          FontSizeManager.f12,
+                          FontFamilyConstant.fontFamily,
+                          FontWeightManager.regular,
+                          ColorManager.blackC,
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
             ),
-            SizedBox(
-              height: 5.w,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  date,
-                  style: getTextStyle(
-                    FontSizeManager.f12,
-                    FontFamilyConstant.fontFamily,
-                    FontWeightManager.regular,
-                    ColorManager.blackC,
-                  ),
-                ),
-                Text(
-                  '$time WIB',
-                  style: getTextStyle(
-                    FontSizeManager.f12,
-                    FontFamilyConstant.fontFamily,
-                    FontWeightManager.regular,
-                    ColorManager.blackC,
-                  ),
-                ),
-              ],
-            )
           ],
         ),
       );
@@ -244,19 +262,21 @@ class _CardLogState extends State<CardLog> {
             children: [
               if (state.logModel.data != null ||
                   state.logModel.data!.isNotEmpty) ...{
-                ...state.logModel.data!.map(
+                ...state.logModel.data!.asMap().entries.map(
                   (e) {
                     return cardLog(
-                      '${e.humidity ?? 0}',
-                      '${e.soilMoisture ?? 0}',
-                      '${e.temperature ?? 0}',
-                      '${DateFormat('dd/MM/yyyy').format(
-                        DateTime.parse(e.time ?? DateTime.now().toString()),
-                      )}',
-                      '${'${DateFormat('HH:mm').format(
-                        DateTime.parse(e.time ?? DateTime.now().toString()),
-                      )}'}',
-                    );
+                        '${e.value.humidity ?? 0}',
+                        '${e.value.soilMoisture ?? 0}',
+                        '${e.value.temperature ?? 0}',
+                        '${DateFormat('dd/MM/yyyy').format(
+                          DateTime.parse(
+                              e.value.time ?? DateTime.now().toString()),
+                        )}',
+                        '${'${DateFormat('HH:mm').format(
+                          DateTime.parse(
+                              e.value.time ?? DateTime.now().toString()),
+                        )}'}',
+                        '${e.key + 1}');
                   },
                 ),
               }

@@ -8,6 +8,7 @@ class ColorManager {
   static Color greyC = HexColor.fromHex('#8A899C');
   static Color greyDarkC = HexColor.fromHex('#7C7C8C');
   static Color greyBorder = HexColor.fromHex('#EAEAF0');
+  static Color greyNavbar = HexColor.fromHex('#BDBDBD');
   static Color greenC = HexColor.fromHex('#ECFFE9');
   static Color greyLightC = HexColor.fromHex('#ECE9FF');
   static Color whiteC = HexColor.fromHex('#ffffff');
